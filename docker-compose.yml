@@ -1,0 +1,51 @@
+version: '3.3'
+
+services:
+  app:
+    build: .
+    command: npm run dev
+    container_name: bookmark-manager_app
+    environment:
+      - NODE_ENV=development
+      - MONGO_URL=mongodb://default:password@mongo/bookmark-manager
+      - PORT=80
+      - HOSTNAME=0.0.0.0
+    networks:
+      - net
+    # be sure to install server dependencies on your local machine if you mount the volume
+    # volumes:
+    #  - ./server:/app
+    depends_on:
+      - mongo
+    ports:
+      - 3000:80
+
+  mongo:
+    image: mongo
+    networks:
+      - net
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: bookmark-manager
+    ports:
+      - 27017:27017
+    volumes:
+      - db_data:/data/db
+      - ./tools/mongo:/docker-entrypoint-initdb.d
+
+  mongo-express:
+    image: mongo-express
+    networks:
+      - net
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root
+
+networks:
+  net:
+
+volumes:
+  db_data:
